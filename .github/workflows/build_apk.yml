@@ -28,11 +28,20 @@ jobs:
           channel: 'stable'
           cache: true
 
-      - name: Build Android APK
+      - name: Prepare Flutter Android Project
         run: |
           cd flutter_app
           flutter create . --platforms=android
+          # مسح سطر package لتوافق Gradle الحديث
+          sed -i 's/package="[^"]*"//g' android/app/src/main/AndroidManifest.xml
+          # ترقية compileSdk إلى 35
+          sed -i 's/compileSdk = .*/compileSdk = 35/g' android/app/build.gradle || true
+          sed -i 's/compileSdkVersion .*/compileSdkVersion 35/g' android/app/build.gradle || true
           flutter pub get
+
+      - name: Build Android APK
+        run: |
+          cd flutter_app
           flutter build apk --release
 
       - name: Upload APK
